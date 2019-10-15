@@ -47,7 +47,7 @@ class EntryDetailViewController: UIViewController, UITextFieldDelegate {
                 
             }
         } else {
-            EntryController.shared.addEntryWith(titleText: entryTitle, bodyText: bodyText) { (success) in
+            EntryController.shared.saveEntry(titleText: entryTitle, bodyText: bodyText) { (success) in
                 if success {
                     DispatchQueue.main.async {
                         self.navigationController?.popViewController(animated: true)

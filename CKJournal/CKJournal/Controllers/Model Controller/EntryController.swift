@@ -12,7 +12,7 @@ import CloudKit
 class EntryController {
     
     // Properties
-    let publicDB = CKContainer.default().publicCloudDatabase
+    let privateDB = CKContainer.default().privateCloudDatabase
     
     // Shared Instance
     static let shared = EntryController()
@@ -20,25 +20,13 @@ class EntryController {
     // SOT
     var entries: [Entry] = []
     
-    // CRUD
-    // Create
     
-    func addEntryWith(titleText: String, bodyText: String, completion: @escaping (Bool) -> Void) {
+    // Save or Create
+    
+    func saveEntry(titleText: String, bodyText: String, completion: @escaping (_ success: Bool) -> Void) {
         let newEntry = Entry(titleText: titleText, bodyText: bodyText)
-        saveEntry(entry: newEntry) { (success) in
-            if success {
-                completion(true)
-            } else {
-                completion(false)
-            }
-        }
-    }
-    
-    // Save
-    
-    func saveEntry(entry: Entry, completion: @escaping (_ success: Bool) -> Void) {
-        let entryRecord = CKRecord(entry: entry)
-        publicDB.save(entryRecord) { (record, error) in
+        let entryRecord = CKRecord(entry: newEntry)
+        privateDB.save(entryRecord) { (record, error) in
             if let error = error {
                 print("Error in \(#function) : \(error.localizedDescription) \n---\n \(error)")
                 completion(false)
@@ -58,7 +46,7 @@ class EntryController {
     func fetchEntries(completion: @escaping (Bool) -> Void) {
         let predicate = NSPredicate(value: true)
         let query = CKQuery(recordType: EntryConstants.RecordType, predicate: predicate)
-        publicDB.perform(query, inZoneWith: nil) { (foundRecords, error) in
+        privateDB.perform(query, inZoneWith: nil) { (foundRecords, error) in
             if let error = error {
                 print("Error in \(#function) : \(error.localizedDescription) \n---\n \(error)")
                 completion(false)
@@ -78,7 +66,7 @@ class EntryController {
     func removeEntry(entry: Entry) {
         guard let indexToRemove = entries.firstIndex(of: entry) else { return }
         entries.remove(at: indexToRemove)
-        publicDB.delete(withRecordID: entry.ckRecordID) { (ckRecordID, error) in
+        privateDB.delete(withRecordID: entry.ckRecordID) { (ckRecordID, error) in
             if let error = error {
                 print("Error in \(#function) : \(error.localizedDescription) \n---\n \(error)")
             } else { return }
